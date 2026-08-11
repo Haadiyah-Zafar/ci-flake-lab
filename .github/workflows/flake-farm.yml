@@ -1,0 +1,26 @@
+name: Flake Farm
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  flaky-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flake-type: [RACE, NETWORK, INFRA, DEPENDENCY]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Enable flake type
+        run: echo "FLAKE_${{ matrix.flake-type }}=1" >> "$GITHUB_ENV"
+
+      - run: pip install pytest
+      - run: pytest test_app.py -v
